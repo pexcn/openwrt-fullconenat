@@ -1,0 +1,86 @@
+#!/bin/sh /etc/rc.common
+
+START=90
+STOP=10
+
+CONFIG=fullconenat
+SECTION=fullconenat
+
+_uci_get_bool() {
+  local val=$(uci get $CONFIG.@$SECTION[0].$1 2>/dev/null)
+  case $val in
+    1|on|true|yes|enabled) return 0;;
+  esac
+  return 1
+}
+
+_uci_get_string() {
+  local val=$(uci get $CONFIG.@$SECTION[0].$1 2>/dev/null)
+  echo ${val:=$2}
+}
+
+is_enabled() {
+  _uci_get_bool enable
+}
+
+is_all_mode() {
+  [[ $(_uci_get_string mode) = 'all' ]
+}
+
+is_ip_mode() {
+  [[ $(_uci_get_string mode) = 'ip' ]
+}
+
+is_firewall_builtin() {
+  strings $(which fw3) | grep -q "fullcone"
+  return $?
+}
+
+flush_rule() {
+  local chk_rule=$(echo "$@" | sed -e 's/-A/-C/' -e 's/--append/--check/')
+  local del_rule=$(echo "$@" | sed -e 's/-A/-D/' -e 's/--append/--delete/')
+  #$chk_rule 2>/dev/null && $del_rule
+  while $chk_rule 2>/dev/null
+  do
+    $del_rule
+  done
+}
+
+apply_fullconenat() {
+  if is_all_mode; then
+    if is_firewall_builtin; then
+      uci set firewall.@zone[1].fullcone=1
+      uci commit firewall
+    else
+      iptables -t nat -A zone_wan_prerouting -j FULLCONENAT
+      iptables -t nat -A zone_wan_postrouting -j FULLCONENAT
+    fi
+  elif is_ip_mode; then
+      # TODO...
+  fi
+}
+
+revoke_fullconenat() {
+  if is_firewall_builtin; then
+    uci set firewall.@zone[1].fullcone=0
+    uci commit firewall
+  else
+    flush_rule "iptables -t nat -A zone_wan_prerouting -j FULLCONENAT"
+    flush_rule "iptables -t nat -A zone_wan_postrouting -j FULLCONENAT"
+  fi
+  # TODO...
+}
+
+start() {
+  if is_enabled; then
+    apply_fullconenat
+  else
+    revoke_fullconenat
+  fi
+  /etc/init.d/firewall reload
+}
+
+stop() {
+  revoke_fullconenat
+  /etc/init.d/firewall reload
+}
