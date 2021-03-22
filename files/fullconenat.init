@@ -36,6 +36,11 @@ is_firewall_builtin() {
   return $?
 }
 
+get_ip_list() {
+  # https://unix.stackexchange.com/a/205854
+  _uci_get_string ip | awk '{$1=$1};1' | sed 's/ /,/g'
+}
+
 flush_rule() {
   local chk_rule=$(echo "$@" | sed -e 's/-A/-C/' -e 's/--append/--check/')
   local del_rule=$(echo "$@" | sed -e 's/-A/-D/' -e 's/--append/--delete/')
@@ -68,15 +73,12 @@ revoke_fullconenat() {
     flush_rule "iptables -t nat -A zone_wan_prerouting -j FULLCONENAT"
     flush_rule "iptables -t nat -A zone_wan_postrouting -j FULLCONENAT"
   fi
-  # TODO...
+  # FIXME
+  flush_rule "iptables -t nat -A zone_wan_postrouting -j FULLCONENAT -s $(get_ip_list)"
 }
 
 start() {
-  if is_enabled; then
-    apply_fullconenat
-  else
-    revoke_fullconenat
-  fi
+  is_enabled && apply_fullconenat || revoke_fullconenat
   /etc/init.d/firewall reload
 }
 
