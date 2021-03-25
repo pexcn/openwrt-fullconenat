@@ -1,5 +1,9 @@
 #!/bin/sh /etc/rc.common
 
+#
+# WARNING: --to-source option seems not working.
+#
+
 START=90
 STOP=10
 
@@ -74,7 +78,7 @@ revoke_fullconenat() {
     flush_rule "iptables -t nat -A zone_wan_postrouting -j FULLCONENAT"
   fi
   # FIXME
-  flush_rule "iptables -t nat -A zone_wan_postrouting -j FULLCONENAT -s $(get_ip_list)"
+  flush_rule "iptables -t nat -A zone_wan_postrouting -j FULLCONENAT --to-source $(get_ip_list)"
 }
 
 start() {
