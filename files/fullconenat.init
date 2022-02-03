@@ -30,7 +30,7 @@ is_enabled() {
 }
 
 is_global_mode() {
-  _uci_get_string ip && return 1 || return 0
+  _uci_get_string ip >/dev/null && return 1 || return 0
 }
 
 get_ip_list() {
@@ -71,12 +71,12 @@ revoke_fullconenat() {
 
 start() {
   is_enabled && apply_fullconenat || revoke_fullconenat
-  /etc/init.d/firewall restart
+  /etc/init.d/firewall restart &>/dev/null
 }
 
 stop() {
   revoke_fullconenat
-  /etc/init.d/firewall restart
+  /etc/init.d/firewall restart &>/dev/null
 }
 
 restart() {
