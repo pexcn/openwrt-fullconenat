@@ -21,6 +21,26 @@ PKG_LICENSE_FILES:=LICENSE
 
 include $(INCLUDE_DIR)/package.mk
 
+define Package/fullconenat
+  SUBMENU:=Firewall
+  SECTION:=net
+  CATEGORY:=Network
+  TITLE:=FULLCONENAT config and script
+  DEPENDS:=+iptables-mod-fullconenat +firewall
+  MAINTAINER:=pexcn <i@pexcn.me>
+endef
+
+define Package/fullconenat/conffiles
+/etc/config/fullconenat
+endef
+
+define Package/fullconenat/install
+	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_BIN) files/fullconenat.init $(1)/etc/init.d/fullconenat
+	$(INSTALL_DIR) $(1)/etc/config
+	$(INSTALL_CONF) files/fullconenat.config $(1)/etc/config/fullconenat
+endef
+
 define Package/iptables-mod-fullconenat
   SUBMENU:=Firewall
   SECTION:=net
@@ -62,5 +82,6 @@ define Build/Compile
 	$(call Build/Compile/Default)
 endef
 
+$(eval $(call BuildPackage,fullconenat))
 $(eval $(call BuildPackage,iptables-mod-fullconenat))
 $(eval $(call KernelPackage,ipt-fullconenat))
