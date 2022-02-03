@@ -27,24 +27,6 @@ is_global_mode() {
   _uci_get_string ip && return 1 || return 0
 }
 
-is_builtin_fw3() {
-  strings $(which fw3) | grep -q "fullcone"
-}
-
-set_fullcone_fw3() {
-  if uci -q set firewall.@zone[1].fullcone=1; then
-    uci commit firewall
-    /etc/init.d/firewall reload
-  fi
-}
-
-del_fullcone_fw3() {
-  if uci -q del firewall.@zone[1].fullcone; then
-    uci commit firewall
-    /etc/init.d/firewall reload
-  fi
-}
-
 set_fullcone() {
   local ips="$1"
   if [ -n "$ips" ]; then
@@ -69,9 +51,8 @@ get_ip_list() {
 
 apply_fullconenat() {
   if is_global_mode; then
-    is_builtin_fw3 && set_fullcone_fw3 || set_fullcone
+    set_fullcone
   else
-    is_builtin_fw3 && del_fullcone_fw3
 	set_fullcone $(get_ip_list)
   fi
 }
