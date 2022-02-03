@@ -39,7 +39,7 @@ get_ip_list() {
 }
 
 get_insert_position() {
-  echo $(($(iptables -t nat -S zone_wan_postrouting | wc -l) - 1))
+  echo $(($(iptables -t nat -S zone_wan_postrouting | grep -v "Full-cone NAT" | wc -l) - 1))
 }
 
 apply_fullconenat() {
