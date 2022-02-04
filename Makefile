@@ -41,6 +41,12 @@ define Package/fullconenat/install
 	$(INSTALL_CONF) files/fullconenat.config $(1)/etc/config/fullconenat
 endef
 
+define Package/fullconenat/postrm
+#!/bin/sh
+sed -i '/Full-cone NAT/d' /etc/firewall.user
+exit 0
+endef
+
 define Package/iptables-mod-fullconenat
   SUBMENU:=Firewall
   SECTION:=net
