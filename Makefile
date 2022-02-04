@@ -41,10 +41,17 @@ define Package/fullconenat/install
 	$(INSTALL_CONF) files/fullconenat.config $(1)/etc/config/fullconenat
 endef
 
+define Package/fullconenat/postinst
+#!/bin/sh
+uci set firewall.@include[0].reload=1
+uci commit firewall
+endef
+
 define Package/fullconenat/postrm
 #!/bin/sh
 sed -i '/Full-cone NAT/d' /etc/firewall.user
-exit 0
+uci -q del firewall.@include[0].reload
+uci commit firewall
 endef
 
 define Package/iptables-mod-fullconenat
