@@ -74,7 +74,7 @@ apply_fullconenat() {
   fi
 
   # make sure the fullconenat rules are executed last
-  is_need_reorder && reorder_rules
+  is_need_reorder && reorder_rules || return 0
 }
 
 revoke_fullconenat() {
