@@ -79,6 +79,7 @@ apply_fullconenat() {
 
 revoke_fullconenat() {
   grep -q 'Full-cone NAT' $FIREWALL && sed -i '/Full-cone NAT/d' $FIREWALL
+  eval "$(iptables-save | grep 'Full-cone NAT' | sed 's/-A/iptables -t nat -D/')"
 }
 
 start() {
