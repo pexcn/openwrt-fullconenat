@@ -36,12 +36,13 @@ is_global_mode() {
 }
 
 get_ip_list() {
-  # reference: https://unix.stackexchange.com/a/205854
+  # https://unix.stackexchange.com/a/205854
   _uci_get_string ip | awk '{$1=$1};1' | sed 's/ /,/g'
 }
 
 get_insert_position() {
-  echo $(($(iptables -t nat -S zone_wan_postrouting | grep -v "Full-cone NAT" | wc -l) - 1))
+  # https://github.com/openwrt/packages/blob/1431f62/net/miniupnpd/files/firewall.include#L22
+  iptables -t nat --line-numbers -nL "zone_wan_postrouting" | sed -ne '$s/[^0-9].*//p'
 }
 
 apply_fullconenat() {
