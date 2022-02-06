@@ -37,20 +37,15 @@ endef
 define Package/fullconenat/install
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) files/fullconenat.init $(1)/etc/init.d/fullconenat
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
+	$(INSTALL_BIN) files/fullconenat.defaults $(1)/etc/uci-defaults/99-fullconenat
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) files/fullconenat.config $(1)/etc/config/fullconenat
 endef
 
-define Package/fullconenat/postinst
-#!/bin/sh
-uci set firewall.@include[0].reload=1
-uci commit firewall
-endef
-
 define Package/fullconenat/postrm
 #!/bin/sh
-sed -i '/Full-cone NAT/d' /etc/firewall.user
-uci -q del firewall.@include[0].reload
+uci -q delete firewall.fullconenat
 uci commit firewall
 endef
 

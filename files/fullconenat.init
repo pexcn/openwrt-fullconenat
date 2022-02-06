@@ -12,6 +12,8 @@ STOP=10
 CONFIG=fullconenat
 SECTION=fullconenat
 
+FIREWALL=/etc/fullconenat.include
+
 _uci_get_bool() {
   local val=$(uci -q get $CONFIG.@$SECTION[0].$1)
   case $val in
@@ -48,25 +50,21 @@ apply_fullconenat() {
   # https://github.com/LGA1150/openwrt-fullconenat#workaround-for-conflicting-with-module-nf_conntrack_netlink
   lsmod | grep -q nf_conntrack_netlink && rmmod nf_conntrack_netlink
 
-  # clean up before adding rules
-  sed -i '/Full-cone NAT/d' /etc/firewall.user
+  # make sure does not exist Full-cone NAT rules
+  revoke_fullconenat
 
-  # the point is to insert the rule before MASQUERADE
+  # insert to chain as penultimate, the point is insert before MASQUERADE
   if is_global_mode; then
-    local prerouting_rule="iptables -t nat -A zone_wan_prerouting -m comment --comment \"Full-cone NAT\" -j FULLCONENAT"
-    local postrouting_rule="iptables -t nat -I zone_wan_postrouting $(get_insert_position) -m comment --comment \"Full-cone NAT\" -j FULLCONENAT"
-    echo "$prerouting_rule" >> /etc/firewall.user
-    echo "$postrouting_rule" >> /etc/firewall.user
+    echo "iptables -t nat -A zone_wan_prerouting -m comment --comment 'Full-cone NAT' -j FULLCONENAT" >> $FIREWALL
+    echo "iptables -t nat -I zone_wan_postrouting $(get_insert_position) -m comment --comment 'Full-cone NAT' -j FULLCONENAT" >> $FIREWALL
   else
-    local prerouting_rule="iptables -t nat -A zone_wan_prerouting -m comment --comment \"Full-cone NAT\" -j FULLCONENAT"
-    local postrouting_rule="iptables -t nat -I zone_wan_postrouting $(get_insert_position) -s $(get_ip_list) -m comment --comment \"Full-cone NAT\" -j FULLCONENAT"
-    echo "$prerouting_rule" >> /etc/firewall.user
-    echo "$postrouting_rule" >> /etc/firewall.user
+    echo "iptables -t nat -A zone_wan_prerouting -m comment --comment 'Full-cone NAT' -j FULLCONENAT" >> $FIREWALL
+    echo "iptables -t nat -I zone_wan_postrouting $(get_insert_position) -s $(get_ip_list) -m comment --comment 'Full-cone NAT' -j FULLCONENAT" >> $FIREWALL
   fi
 }
 
 revoke_fullconenat() {
-  sed -i '/Full-cone NAT/d' /etc/firewall.user
+  grep -q 'Full-cone NAT' $FIREWALL && sed -i '/Full-cone NAT/d' $FIREWALL
 }
 
 start() {
