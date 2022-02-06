@@ -45,6 +45,7 @@ endef
 
 define Package/fullconenat/postrm
 #!/bin/sh
+rm -f /etc/fullconenat.include
 uci -q delete firewall.fullconenat
 uci commit firewall
 endef
