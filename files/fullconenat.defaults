@@ -1,5 +1,7 @@
 #!/bin/sh
 
+touch /etc/fullconenat.include
+
 uci -q batch <<-EOF
 delete firewall.fullconenat
 set firewall.fullconenat=include
