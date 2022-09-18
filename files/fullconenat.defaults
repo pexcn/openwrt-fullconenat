@@ -1,6 +1,9 @@
 #!/bin/sh
 
-touch /etc/fullconenat.include
+cat <<EOF > /etc/fullconenat.include
+#!/bin/sh
+/etc/init.d/fullconenat restart
+EOF
 
 uci -q batch <<-EOF
 delete firewall.fullconenat
