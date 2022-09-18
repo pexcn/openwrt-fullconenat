@@ -86,3 +86,7 @@ start() {
 stop() {
   revoke_fullconenat
 }
+
+restart() {
+  start
+}
