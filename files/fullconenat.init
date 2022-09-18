@@ -6,7 +6,7 @@
 # See /LICENSE for more information.
 #
 
-START=99
+START=90
 STOP=10
 
 CONFIG=fullconenat
@@ -23,8 +23,7 @@ _uci_get_bool() {
 }
 
 _uci_get_string() {
-  local val=$(uci -q get $CONFIG.@$SECTION[0].$1)
-  [ -n "$val" ] && echo $val
+  uci -q get $CONFIG.@$SECTION[0].$1
 }
 
 is_enabled() {
@@ -59,7 +58,7 @@ apply_fullconenat() {
   # try avoid conflicting with nf_conntrack_netlink
   # https://github.com/Chion82/netfilter-full-cone-nat/issues/14#issuecomment-393385630
   # https://github.com/LGA1150/openwrt-fullconenat#workaround-for-conflicting-with-module-nf_conntrack_netlink
-  lsmod | grep -q nf_conntrack_netlink && rmmod nf_conntrack_netlink
+  ! lsmod | grep -q nf_conntrack_netlink || rmmod nf_conntrack_netlink
 
   # make sure does not exist Full-cone NAT rules
   revoke_fullconenat
@@ -78,8 +77,8 @@ apply_fullconenat() {
 }
 
 revoke_fullconenat() {
-  grep -q 'Full-cone NAT' $FIREWALL && sed -i '/Full-cone NAT/d' $FIREWALL
   eval "$(iptables-save | grep 'Full-cone NAT' | sed 's/-A/iptables -t nat -D/')"
+  ! grep -q 'Full-cone NAT' $FIREWALL || sed -i '/Full-cone NAT/d' $FIREWALL
 }
 
 start() {
