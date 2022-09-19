@@ -32,6 +32,10 @@ is_global_mode() {
   _uci_get_string ip >/dev/null && return 1 || return 0
 }
 
+get_ip_list() {
+  _uci_get_string ip
+}
+
 is_need_reorder() {
   local firewall_config="/etc/config/firewall"
   grep 'config include' $firewall_config | tail -1 | grep -q 'fullconenat' && return 1 || return 0
@@ -41,11 +45,6 @@ reorder_rules() {
   local penultimate=$(echo $(($(cat /etc/config/firewall | grep "^config " | wc -l) - 1)))
   uci reorder firewall.fullconenat=$penultimate
   uci commit firewall
-}
-
-get_ip_list() {
-  # https://unix.stackexchange.com/a/205854
-  _uci_get_string ip | awk '{$1=$1};1' | sed 's/ /,/g'
 }
 
 get_insert_position() {
@@ -68,7 +67,9 @@ apply_fullconenat() {
     iptables -t nat -I zone_wan_postrouting $(get_insert_position) -m comment --comment 'Full-cone NAT' -j FULLCONENAT
   else
     iptables -t nat -A zone_wan_prerouting -m comment --comment 'Full-cone NAT' -j FULLCONENAT
-    iptables -t nat -I zone_wan_postrouting $(get_insert_position) -s $(get_ip_list) -m comment --comment 'Full-cone NAT' -j FULLCONENAT
+    for ip in $(get_ip_list); do
+      iptables -t nat -I zone_wan_postrouting $(get_insert_position) -s $ip -m comment --comment 'Full-cone NAT' -j FULLCONENAT
+    done
   fi
 
   # make sure the fullconenat rules will be executed last
