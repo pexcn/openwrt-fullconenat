@@ -1,8 +1,0 @@
-#!/bin/sh
-
-/etc/init.d/fullconenat enabled || exit 0
-
-[[ "$INTERFACE" = "wan" && "$ACTION" = "ifup" ]] && /etc/init.d/fullconenat restart
-[[ "$INTERFACE" = "wan" && "$ACTION" = "ifdown" ]] && /etc/init.d/fullconenat stop
-
-exit 0

@@ -41,8 +41,6 @@ define Package/fullconenat/install
 	$(INSTALL_BIN) files/fullconenat.defaults $(1)/etc/uci-defaults/99-fullconenat
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) files/fullconenat.config $(1)/etc/config/fullconenat
-	$(INSTALL_DIR) $(1)/etc/hotplug.d/iface
-	$(INSTALL_DATA) files/fullconenat.hotplug $(1)/etc/hotplug.d/iface/99-fullconenat
 endef
 
 define Package/fullconenat/postrm
