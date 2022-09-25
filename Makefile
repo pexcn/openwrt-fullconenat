@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=fullconenat
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_SOURCE_DATE:=2022-02-13
 PKG_SOURCE_PROTO:=git
@@ -37,17 +37,20 @@ endef
 define Package/fullconenat/install
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) files/fullconenat.init $(1)/etc/init.d/fullconenat
-	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_BIN) files/fullconenat.defaults $(1)/etc/uci-defaults/99-fullconenat
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) files/fullconenat.config $(1)/etc/config/fullconenat
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
+	$(INSTALL_BIN) files/fullconenat.defaults $(1)/etc/uci-defaults/99-fullconenat
+	$(INSTALL_DIR) $(1)/usr/share/fullconenat
+	$(INSTALL_DATA) files/fullconenat.firewall $(1)/usr/share/fullconenat/firewall.include
 endef
 
 define Package/fullconenat/postrm
 #!/bin/sh
-rm -f /etc/fullconenat.include
+rmdir --ignore-fail-on-non-empty /usr/share/fullconenat
 uci -q delete firewall.fullconenat
 uci commit firewall
+exit 0
 endef
 
 define Package/iptables-mod-fullconenat
