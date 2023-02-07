@@ -27,7 +27,7 @@ define Package/fullconenat
   CATEGORY:=Network
   TITLE:=FULLCONENAT config and script
   DEPENDS:=+iptables-mod-fullconenat +firewall
-  MAINTAINER:=pexcn <i@pexcn.me>
+  MAINTAINER:=pexcn <pexcn97@gmail.com>
 endef
 
 define Package/fullconenat/conffiles
