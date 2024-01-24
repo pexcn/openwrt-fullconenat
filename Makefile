@@ -27,7 +27,7 @@ define Package/fullconenat
   SECTION:=net
   CATEGORY:=Network
   TITLE:=FULLCONENAT config and script
-  DEPENDS:=+iptables-mod-fullconenat +firewall
+  DEPENDS:=+iptables-mod-fullconenat
   MAINTAINER:=pexcn <pexcn97@gmail.com>
 endef
 
@@ -59,7 +59,7 @@ define Package/iptables-mod-fullconenat
   SECTION:=net
   CATEGORY:=Network
   TITLE:=FULLCONENAT iptables extension
-  DEPENDS:=+iptables +kmod-ipt-fullconenat
+  DEPENDS:=+iptables +ip6tables +kmod-ipt-fullconenat
   MAINTAINER:=Chion Tang <tech@chionlab.moe>
 endef
 
